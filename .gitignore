@@ -1,0 +1,21 @@
+# Environment & Secrets
+.env
+*.env
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.class
+venv/
+.venv/
+
+# Node / Frontend artifacts
+node_modules/
+.next/
+dist/
+build/
+.turbo/
+
+# System files
+.DS_Store
+Thumbs.db

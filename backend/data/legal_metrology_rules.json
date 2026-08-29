@@ -1,0 +1,290 @@
+{
+  "dataset": {
+    "name": "Legal Metrology (Packaged Commodities) Rules, 2011 — Machine Compliance Seed",
+    "jurisdiction": "India",
+    "law": "Legal Metrology (Packaged Commodities) Rules, 2011",
+    "last_updated": "2026-08-25",
+    "version": "2026.3"
+  },
+  "sources": [
+    {
+      "notification": "G.S.R. 202(E)",
+      "publication_date": "2011-03-07",
+      "effective_date": "2011-04-01",
+      "title": "Principal Legal Metrology (Packaged Commodities) Rules, 2011",
+      "role": "baseline"
+    },
+    {
+      "notification": "G.S.R. 137(E)",
+      "publication_date": "2014-06-16",
+      "effective_date": "2014-07-01",
+      "title": "Veg/Non-Veg Dot Marking for Cosmetics and Toiletries",
+      "role": "amendment"
+    },
+    {
+      "notification": "G.S.R. 870(E)",
+      "publication_date": "2014-12-04",
+      "effective_date": "2014-12-04",
+      "title": "Handloom Yarn Thread Exemption under Rule 26(e)",
+      "role": "amendment"
+    },
+    {
+      "notification": "G.S.R. 385(E)",
+      "publication_date": "2015-05-14",
+      "effective_date": "2015-05-14",
+      "title": "PDP Calculation Formulas and Tobacco Exemption Proviso",
+      "role": "amendment"
+    },
+    {
+      "notification": "G.S.R. 858(E)",
+      "publication_date": "2016-09-07",
+      "effective_date": "2016-09-07",
+      "title": "Essential Commodities Act 1955 Override Provisos",
+      "role": "amendment"
+    },
+    {
+      "notification": "G.S.R. 779(E)",
+      "publication_date": "2021-11-02",
+      "effective_date": "2022-10-01",
+      "title": "Mandatory Unit Sale Price (USP) and CPS 2019 Alignment",
+      "role": "amendment"
+    },
+    {
+      "notification": "G.S.R. 226(E)",
+      "publication_date": "2022-03-28",
+      "effective_date": "2022-10-01",
+      "title": "Omission of Second Schedule and Decimal Rounding for USP",
+      "role": "amendment"
+    },
+    {
+      "notification": "G.S.R. 577(E)",
+      "publication_date": "2022-07-14",
+      "effective_date": "2022-07-15",
+      "title": "QR Code Declaration Option for Electronic Products",
+      "role": "amendment"
+    }
+  ],
+  "rules": [
+    { "rule_number": "1", "title": "Short title and commencement" },
+    { "rule_number": "2", "title": "Definitions" },
+    { "rule_number": "3", "title": "Applicability of Chapter II" },
+    { "rule_number": "4", "title": "Regulation for pre-packing and sale etc. of commodities" },
+    { "rule_number": "5", "title": "Omitted w.e.f 01-10-2022 (formerly recommended standard packages)" },
+    { "rule_number": "6", "title": "Declarations to be made on every package" },
+    { "rule_number": "7", "title": "Principal display panel — its area, size and letter etc." },
+    { "rule_number": "8", "title": "Declaration where to appear" },
+    { "rule_number": "9", "title": "Manner in which declaration shall be made" },
+    { "rule_number": "10", "title": "Declaration of name and address of the manufacturer, etc." },
+    { "rule_number": "11", "title": "General provisions relating to declaration of quantity" },
+    { "rule_number": "12", "title": "Manner in which declaration of quantity shall be" },
+    { "rule_number": "13", "title": "Statement of units of weight, measure or number" },
+    { "rule_number": "14", "title": "Declarations with regard to dimensions of certain commodities" },
+    { "rule_number": "15", "title": "Declaration with regard to dimensions and weight" },
+    { "rule_number": "16", "title": "Number of usable sheets to be stated" },
+    { "rule_number": "17", "title": "Dimensions of container type commodities" },
+    { "rule_number": "18", "title": "Provisions relating to wholesale dealer and retail dealers" },
+    { "rule_number": "19", "title": "Inspection of quantity and error in packages" },
+    { "rule_number": "20", "title": "Action to be taken on completion of inspection" },
+    { "rule_number": "21", "title": "Inspection of quantity and error at dealer premises" },
+    { "rule_number": "22", "title": "Establishment of maximum permissible error on package" },
+    { "rule_number": "23", "title": "Deceptive packages to be repacked or seized" },
+    { "rule_number": "24", "title": "Declarations on wholesale packages" },
+    { "rule_number": "25", "title": "Restrictions on sale of export packages in India" },
+    { "rule_number": "26", "title": "Exemption in respect of certain packages" },
+    { "rule_number": "27", "title": "Registration of manufacturers, packers and importers" },
+    { "rule_number": "28", "title": "Registration of shorter address permissible" },
+    { "rule_number": "29", "title": "Registration register" },
+    { "rule_number": "30", "title": "Compilation and circulation of lists" },
+    { "rule_number": "31", "title": "Advertisements" },
+    { "rule_number": "32", "title": "Penalty for contravention of rules" },
+    { "rule_number": "32-A", "title": "Sum of compounding of offences" },
+    { "rule_number": "33", "title": "Power to relax" },
+    { "rule_number": "34", "title": "Repeal and savings" }
+  ],
+  "requirements": [
+    {
+      "code": "MANUFACTURER_ADDRESS",
+      "rule": "Rule 6(1)(a) & 10",
+      "field": "manufacturer_details",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "regex_pattern": "(?i)(mfd\\.?\\s*by|marketed\\s*by|pkd\\.?\\s*by|imported\\s*by|manufactured\\s*by)[:\\s]+([A-Za-z0-9\\s,.-]+(?:\\b\\d{6}\\b)?)",
+      "description": "Manufacturer, Packer, or Importer complete name and registered address with PIN code."
+    },
+    {
+      "code": "GENERIC_NAME",
+      "rule": "Rule 6(1)(b)",
+      "field": "commodity_name",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "regex_pattern": "(?i)(commodity|product|item|name)[:\\s]+([A-Za-z0-9\\s-]+)",
+      "description": "Common or generic name of the commodity contained in the package."
+    },
+    {
+      "code": "NET_QUANTITY",
+      "rule": "Rule 6(1)(c) & 13",
+      "field": "net_quantity",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "allowed_units": ["g", "kg", "mL", "ml", "L", "l", "m", "cm", "mm", "N", "U"],
+      "regex_pattern": "(?i)(?:net\\s*(?:qty|quantity|wt|weight|vol|volume)?[:\\s]*)(\\d+(?:\\.\\d+)?)\\s*(g|kg|ml|mL|l|L|m|cm|mm|N|U)\\b",
+      "description": "Net quantity in standard metric SI symbols (g, kg, mL, L, m, cm, N, U)."
+    },
+    {
+      "code": "MFG_DATE",
+      "rule": "Rule 6(1)(d)",
+      "field": "mfg_date",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "regex_pattern": "(?i)(?:mfg|pkd|packed|date|mfd)[:\\s]*((?:0[1-9]|1[0-2])\\/(?:20)?\\d{2}|(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\\s*(?:20)?\\d{2})",
+      "description": "Month and Year of manufacture in MM/YYYY or Month Year format."
+    },
+    {
+      "code": "MRP_TAX_STATEMENT",
+      "rule": "Rule 6(1)(e)",
+      "field": "mrp",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "regex_pattern": "(?i)(?:m\\.?r\\.?p\\.?|max(?:imum)?\\s*retail\\s*price)[:\\s]*(?:rs\\.?|₹)?\\s*(\\d+(?:\\.\\d{2})?)[^\\n]*?(incl(?:usive)?\\.?\\s*of\\s*all\\s*taxes)",
+      "description": "Maximum Retail Price in Indian Rupees stating 'inclusive of all taxes' or 'incl. of all taxes'."
+    },
+    {
+      "code": "COUNTRY_OF_ORIGIN",
+      "rule": "Rule 6(1)(f)",
+      "field": "country_of_origin",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "regex_pattern": "(?i)(country\\s*of\\s*origin|made\\s*in|origin)[:\\s]+([A-Za-z\\s]+)",
+      "description": "Declaration of the country of origin on imported and domestic packaged commodities."
+    },
+    {
+      "code": "CONSUMER_CARE",
+      "rule": "Rule 6(2)",
+      "field": "consumer_care",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "description": "Full complaint contact details containing Name/Designation, Phone, Email, and Postal Address."
+    },
+    {
+      "code": "UNIT_SALE_PRICE",
+      "rule": "Rule 6(11)",
+      "field": "unit_sale_price",
+      "severity": "HIGH",
+      "machine_checkable": true,
+      "effective_from": "2022-10-01",
+      "regex_pattern": "(?i)(?:u(?:nit)?\\s*s(?:ale)?\\s*p(?:rice)?|usp)[:\\s]*(?:rs\\.?|₹)?\\s*(\\d+(?:\\.\\d{1,2})?)\\s*(?:per|\\/)\\s*(g|kg|ml|l|m|cm|n|u|piece|item)",
+      "description": "Unit Sale Price (USP) declared rounded off to two decimal places (e.g., Rs. X.XX per g/kg/mL/L/m/cm/number)."
+    },
+    {
+      "code": "COSMETIC_ORIGIN_DOT",
+      "rule": "Rule 6(8)",
+      "field": "cosmetic_origin_dot",
+      "severity": "MEDIUM",
+      "machine_checkable": true,
+      "effective_from": "2014-07-01",
+      "description": "Red/Brown dot for non-vegetarian or Green dot for vegetarian origin on cosmetics/toiletries."
+    }
+  ],
+  "font_size_matrix": [
+    {
+      "pdp_area_cm2_min": 0,
+      "pdp_area_cm2_max": 50,
+      "min_font_height_mm_small_pack": 1.0,
+      "min_font_height_mm_large_pack": 1.5,
+      "min_font_height_mm_blown_moulded": 2.0
+    },
+    {
+      "pdp_area_cm2_min": 50,
+      "pdp_area_cm2_max": 100,
+      "min_font_height_mm_small_pack": 1.5,
+      "min_font_height_mm_large_pack": 2.0,
+      "min_font_height_mm_blown_moulded": 3.0
+    },
+    {
+      "pdp_area_cm2_min": 100,
+      "pdp_area_cm2_max": 500,
+      "min_font_height_mm_small_pack": 2.5,
+      "min_font_height_mm_large_pack": 4.0,
+      "min_font_height_mm_blown_moulded": 4.0
+    },
+    {
+      "pdp_area_cm2_min": 500,
+      "pdp_area_cm2_max": null,
+      "min_font_height_mm_small_pack": 4.0,
+      "min_font_height_mm_large_pack": 6.0,
+      "min_font_height_mm_blown_moulded": 6.0
+    }
+  ],
+  "ecommerce_rules": [
+    {
+      "code": "ECOMMERCE_MANDATORY_DISPLAY",
+      "rule": "Rule 6(10)",
+      "field": "ecommerce_listing",
+      "is_ecommerce_rule": true,
+      "severity": "HIGH",
+      "description": "Digital listings must display mandatory declarations (Manufacturer, Net Qty, MRP, USP, Consumer Care) on the product display page prior to purchase."
+    }
+  ],
+  "multipack_rules": [
+    {
+      "code": "MULTIPACK_INDIVIDUAL_DECLARATION",
+      "rule": "Rule 6(5) & Rule 13(6)",
+      "field": "multipack_quantity",
+      "is_multipack_rule": true,
+      "severity": "HIGH",
+      "description": "Multi-piece packages must declare number of individual units and net quantity per unit as supplementary declaration (e.g., 10 N x 10 g) alongside total net quantity."
+    }
+  ],
+  "exemptions": [
+    {
+      "code": "EXEMPT_SMALL_PACK",
+      "rule": "Rule 26(a)",
+      "category": "Small Packages",
+      "max_quantity": 10,
+      "unit": "g_or_ml",
+      "exempt_fields": ["mrp", "mfg_date", "unit_sale_price"],
+      "notes": "Package containing 10g or 10ml or less. Tobacco products excluded from exemption w.e.f 2016."
+    },
+    {
+      "code": "EXEMPT_FAST_FOOD",
+      "rule": "Rule 26(b)",
+      "category": "Fast Food",
+      "exempt_fields": ["mrp", "mfg_date", "net_quantity", "unit_sale_price"],
+      "notes": "Fast food items packed by hotel/restaurant."
+    },
+    {
+      "code": "EXEMPT_DPCO_DRUGS",
+      "rule": "Rule 26(c)",
+      "category": "DPCO Formulations",
+      "exempt_fields": ["mrp"],
+      "notes": "Covered under Drugs (Price Control) Order."
+    },
+    {
+      "code": "EXEMPT_BULK_AGRI",
+      "rule": "Rule 26(d)",
+      "category": "Agricultural Produce",
+      "min_quantity": 50,
+      "unit": "kg",
+      "exempt_fields": ["mrp", "mfg_date", "unit_sale_price"],
+      "notes": "Agricultural produce in packages above 50kg."
+    },
+    {
+      "code": "EXEMPT_HANDLOOM_THREAD",
+      "rule": "Rule 26(e)",
+      "category": "Handloom Yarn",
+      "exempt_fields": ["mrp", "unit_sale_price"],
+      "notes": "Thread sold in coils to handloom weavers."
+    }
+  ],
+  "mpe_weight_volume_table": [
+    { "min": 0, "max": 50, "percentage": 9.0, "absolute": null },
+    { "min": 50, "max": 100, "percentage": null, "absolute": 4.5 },
+    { "min": 100, "max": 200, "percentage": 4.5, "absolute": null },
+    { "min": 200, "max": 300, "percentage": null, "absolute": 9.0 },
+    { "min": 300, "max": 500, "percentage": 3.0, "absolute": null },
+    { "min": 500, "max": 1000, "percentage": null, "absolute": 15.0 },
+    { "min": 1000, "max": 10000, "percentage": 1.5, "absolute": null },
+    { "min": 10000, "max": 15000, "percentage": null, "absolute": 150.0 },
+    { "min": 15000, "max": null, "percentage": 1.0, "absolute": null }
+  ]
+}
