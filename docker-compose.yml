@@ -1,0 +1,97 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: lm_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: \
+      POSTGRES_PASSWORD: \
+      POSTGRES_DB: \
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/data/schema_ddl.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \ -d \"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - lm_network
+
+  minio:
+    image: minio/minio:latest
+    container_name: lm_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: \
+      MINIO_ROOT_PASSWORD: \
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    networks:
+      - lm_network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: lm_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    environment:
+      GEMINI_API_KEY: \
+      DATABASE_URL: postgresql://\:\@postgres:5432/\
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: \
+      S3_SECRET_KEY: \
+      S3_BUCKET_NAME: \
+      CORS_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend/app:/app/app
+      - ./backend/data:/app/data
+    networks:
+      - lm_network
+
+  frontend:
+    build:
+      context: ./web_dashboard
+      dockerfile: Dockerfile
+    container_name: lm_frontend
+    restart: unless-stopped
+    depends_on:
+      - backend
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000/api/v1
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./web_dashboard/src:/app/src
+      - ./web_dashboard/public:/app/public
+    networks:
+      - lm_network
+
+networks:
+  lm_network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  minio_data:
