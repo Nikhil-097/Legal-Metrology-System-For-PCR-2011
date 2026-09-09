@@ -1,222 +1,383 @@
-import React, { useState } from 'react';
-import Head from 'next/head';
-import AppLayout from '../components/AppLayout';
-import ReportViewer from '../components/ReportViewer';
-import { Upload, ScanLine, Loader2, Image as ImageIcon } from 'lucide-react';
-import axios from 'axios';
+﻿import React, { useState, useRef } from 'react';
+import Link from 'next/link';
+import {
+  LayoutDashboard,
+  ScanLine,
+  History,
+  Settings,
+  UploadCloud,
+  RefreshCw,
+  DownloadCloud,
+  FileSpreadsheet,
+  Utensils,
+  Pill,
+  ShieldCheck,
+  PhoneCall,
+  CheckCircle2,
+  AlertCircle
+} from 'lucide-react';
 
 export default function ScanPage() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [category, setCategory] = useState<'food' | 'drugs_commodities'>('food');
+
+  // Dual surface files
+  const [frontFile, setFrontFile] = useState<File | null>(null);
+  const [frontPreview, setFrontPreview] = useState<string | null>(null);
+  const [backFile, setBackFile] = useState<File | null>(null);
+  const [backPreview, setBackPreview] = useState<string | null>(null);
+
+  const [heightCm, setHeightCm] = useState('15');
+  const [widthCm, setWidthCm] = useState('10');
+  const [brandName, setBrandName] = useState('');
+  const [commodityName, setCommodityName] = useState('');
   const [loading, setLoading] = useState(false);
-  const [scanResult, setScanResult] = useState<any>(null);
-  const [showModal, setShowModal] = useState(false);
+  const [result, setResult] = useState<any | null>(null);
 
-  const [heightCm, setHeightCm] = useState<number>(15.0);
-  const [widthCm, setWidthCm] = useState<number>(10.0);
-  const [pdpType, setPdpType] = useState<string>('rectangular');
-  const [brandName, setBrandName] = useState<string>('');
-  const [commodityName, setCommodityName] = useState<string>('');
+  const frontInputRef = useRef<HTMLInputElement>(null);
+  const backInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      setSelectedFile(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
-  };
-
-  const handleRunVerification = async () => {
-    if (!selectedFile) return;
-
+  const handleAnalyze = async () => {
+    if (!frontFile) return;
     setLoading(true);
+
     const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('height_cm', heightCm.toString());
-    formData.append('width_cm', widthCm.toString());
-    formData.append('pdp_type', pdpType);
+    formData.append('front_file', frontFile);
+    if (backFile) formData.append('back_file', backFile);
+    formData.append('category', category);
+    formData.append('height_cm', heightCm);
+    formData.append('width_cm', widthCm);
     if (brandName) formData.append('brand_name', brandName);
     if (commodityName) formData.append('commodity_name', commodityName);
-    formData.append('inspector_id', 'INSP-402');
-
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/v1';
 
     try {
-      const response = await axios.post(`${baseUrl}/scans/analyze`, formData);
-      setScanResult(response.data);
-      setShowModal(true);
-    } catch (err: any) {
-      const detail = err?.response?.data?.detail;
-      const errorMsg = typeof detail === 'string' ? detail : JSON.stringify(detail) || err.message;
-      alert(`Verification Error: ${errorMsg}`);
+      const res = await fetch('http://localhost:8000/api/v1/scans/analyze', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setResult(data);
+      }
+    } catch (err) {
+      console.error('Inspection failed:', err);
     } finally {
       setLoading(false);
     }
   };
 
+  const declarations = result?.declarations || {};
+  const boxes = result?.bounding_boxes || {};
+  const care = result?.consumer_care || {};
+  const barcode = result?.barcode_data || {};
+  const score = result?.compliance_score ?? 100;
+  const status = result?.status || 'COMPLIANT';
+
   return (
-    <AppLayout>
-      <Head>
-        <title>Scan Product | METROCHECK</title>
-      </Head>
-
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Title Section */}
-        <div className="pb-2 flex items-center justify-between">
-          <div>
-            <div className="flex items-center space-x-3">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                AI Optical Compliance Scanner
-              </h1>
-              <span className="px-2.5 py-0.5 bg-blue-50 border border-blue-200 text-[#2541B2] text-[11px] font-bold rounded-md">
-                PCR 2011 Verified
-              </span>
-            </div>
-            <p className="text-xs text-slate-400 mt-1">
-              Extract mandatory statutory declarations, verify font stroke thresholds, and identify Rule 6 contraventions.
-            </p>
-          </div>
-        </div>
-
-        {/* Scan Workbench */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Packaging Artwork Preview Box (8 cols) */}
-          <div className="lg:col-span-8 bg-[#0A1128] rounded-2xl border border-slate-800/60 p-6 shadow-sm flex flex-col items-center justify-center min-h-[460px] relative overflow-hidden">
-            {previewUrl ? (
-              <img
-                src={previewUrl}
-                alt="Packaging Artwork"
-                className="max-h-[410px] w-auto object-contain rounded-xl shadow-lg"
-              />
-            ) : (
-              <div className="flex flex-col items-center justify-center text-slate-500 space-y-3">
-                <div className="w-16 h-16 rounded-2xl bg-slate-900/80 border border-slate-800 flex items-center justify-center">
-                  <ImageIcon className="w-8 h-8 text-slate-600 stroke-[1.5]" />
-                </div>
-                <p className="text-xs font-semibold tracking-wide text-slate-400">
-                  No packaging image selected
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Form & Controls Panel (4 cols) */}
-          <div className="lg:col-span-4 space-y-4">
-            
-            {/* Dimensions & PDP Type */}
-            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-3.5">
-              <h2 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-                Calibrated PDP Parameters
-              </h2>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Height (cm)
-                  </label>
-                  <input
-                    type="number"
-                    value={heightCm}
-                    onChange={(e) => setHeightCm(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-xs font-mono font-bold bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">
-                    Width (cm)
-                  </label>
-                  <input
-                    type="number"
-                    value={widthCm}
-                    onChange={(e) => setWidthCm(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-xs font-mono font-bold bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  PDP Configuration
-                </label>
-                <select
-                  value={pdpType}
-                  onChange={(e) => setPdpType(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-semibold bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition"
-                >
-                  <option value="rectangular">Rectangular (Height × Width)</option>
-                  <option value="cylindrical">Cylindrical (40% × Height × Circumference)</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Brand Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Britannia, Nestle, Amul"
-                  value={brandName}
-                  onChange={(e) => setBrandName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">
-                  Commodity Name (Optional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Packaged Milk, Biscuits, Oil"
-                  value={commodityName}
-                  onChange={(e) => setCommodityName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-slate-50 border border-slate-200/80 rounded-xl focus:outline-none focus:border-blue-600 focus:bg-white text-slate-900 transition"
-                />
-              </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm space-y-3">
-              <label className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-[#2541B2] hover:bg-blue-700 text-white text-xs font-bold rounded-xl cursor-pointer transition shadow-sm">
-                <Upload className="w-4 h-4" />
-                <span>Select Packaging Artwork</span>
-                <input type="file" accept="image/*" onChange={handleFileChange} className="hidden" />
-              </label>
-
-              <button
-                onClick={handleRunVerification}
-                disabled={!selectedFile || loading}
-                className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-[#0A1128] hover:bg-slate-900 text-white text-xs font-bold rounded-xl disabled:opacity-40 disabled:cursor-not-allowed transition shadow-sm"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>Auditing Declarations...</span>
-                  </>
-                ) : (
-                  <>
-                    <ScanLine className="w-4 h-4" />
-                    <span>Run Statutory Verification</span>
-                  </>
-                )}
-              </button>
-
-              {selectedFile && (
-                <p className="text-[11px] text-center font-mono text-slate-400 truncate mt-1">
-                  {selectedFile.name}
-                </p>
-              )}
-            </div>
-
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#070708] text-white flex flex-col font-sans">
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute top-[-10%] left-[20%] w-[600px] h-[600px] bg-[#FF1E1E]/15 rounded-full blur-[160px]" />
+        <div className="absolute inset-0 bg-[radial-gradient(#1c1c20_1px,transparent_1px)] [background-size:28px_28px] opacity-40" />
       </div>
 
-      {/* Audit Report Modal */}
-      {showModal && scanResult && (
-        <ReportViewer scan={scanResult} onClose={() => setShowModal(false)} />
-      )}
-    </AppLayout>
+      <div className="relative z-10 flex flex-1">
+        {/* Sidebar */}
+        <aside className="w-64 border-r border-zinc-900 bg-[#09090b]/80 backdrop-blur flex flex-col justify-between p-6 shrink-0 hidden md:flex">
+          <div className="space-y-8">
+            <Link className="flex items-center space-x-2" href="/">
+              <span className="text-xl font-black tracking-tighter text-white">
+                <span className="text-[#FF1E1E]">++</span>METROCHECK
+              </span>
+            </Link>
+
+            <nav className="space-y-1.5 font-mono text-xs uppercase tracking-wider">
+              <Link className="flex items-center space-x-3 px-3.5 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900/60 rounded-md transition" href="/dashboard">
+                <LayoutDashboard className="w-4 h-4" />
+                <span>Dashboard</span>
+              </Link>
+              <Link className="flex items-center space-x-3 px-3.5 py-3 text-white bg-[#FF1E1E] font-bold rounded-md shadow-lg shadow-[#FF1E1E]/20" href="/scan">
+                <ScanLine className="w-4 h-4" />
+                <span>Dual Scan</span>
+              </Link>
+              <Link className="flex items-center space-x-3 px-3.5 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900/60 rounded-md transition" href="/inspections">
+                <History className="w-4 h-4" />
+                <span>Inspections</span>
+              </Link>
+              <Link className="flex items-center space-x-3 px-3.5 py-3 text-zinc-400 hover:text-white hover:bg-zinc-900/60 rounded-md transition" href="/settings">
+                <Settings className="w-4 h-4" />
+                <span>Settings</span>
+              </Link>
+            </nav>
+          </div>
+
+          <div className="p-4 bg-zinc-950 border border-zinc-900 rounded text-[10px] font-mono text-zinc-500">
+            <div className="text-zinc-400 font-bold mb-1">LEGAL METROLOGY ACT, 2011</div>
+            <div>PCR 2011 + Rule 6(1)(h) Engine</div>
+          </div>
+        </aside>
+
+        {/* Content Area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <header className="h-16 border-b border-zinc-900 bg-[#09090b]/60 backdrop-blur px-8 flex items-center justify-between">
+            <span className="text-zinc-400 font-mono text-xs uppercase tracking-widest font-bold">
+              AI DUAL-PANEL STATUTORY AUDITOR
+            </span>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => window.open('http://localhost:8000/api/v1/scans/export-csv', '_blank')}
+                className="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-mono rounded text-zinc-300 hover:text-white flex items-center gap-2 transition"
+              >
+                <FileSpreadsheet className="w-3.5 h-3.5 text-emerald-500" />
+                <span>Batch CSV Export</span>
+              </button>
+              <div className="text-right font-mono text-xs hidden sm:block">
+                <span className="text-zinc-500 text-[10px] block">STANDARDS</span>
+                <span className="text-zinc-200 uppercase font-bold">PCR 2011 // GS1 VERIFIED</span>
+              </div>
+            </div>
+          </header>
+
+          <main className="flex-1 p-8 space-y-6 overflow-y-auto">
+            {/* Category Toggle */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 bg-zinc-950 border border-zinc-900 rounded-lg">
+              <div>
+                <span className="text-xs font-mono uppercase tracking-wider text-zinc-400 block font-bold">
+                  Packaging Inspection Standard
+                </span>
+                <span className="text-[11px] font-mono text-zinc-500">
+                  {category === 'food'
+                    ? 'Audits Food Category: Rule 6 mandatory declarations + FSSAI registration numbers.'
+                    : 'Audits Non-Food / Commodities: Ommits FSSAI checks; strictly enforces Legal Metrology standard schedules.'}
+                </span>
+              </div>
+
+              <div className="flex bg-zinc-900 p-1 border border-zinc-800 rounded-lg font-mono text-xs">
+                <button
+                  type="button"
+                  onClick={() => setCategory('food')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition font-bold uppercase text-[11px] ${
+                    category === 'food' ? 'bg-[#FF1E1E] text-white shadow-md' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Utensils className="w-3.5 h-3.5" />
+                  <span>Food Products</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setCategory('drugs_commodities')}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-md transition font-bold uppercase text-[11px] ${
+                    category === 'drugs_commodities' ? 'bg-[#FF1E1E] text-white shadow-md' : 'text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <Pill className="w-3.5 h-3.5" />
+                  <span>Drugs & Commodities</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Dual Artwork Upload Section */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Surface 1: Front Principal Display Panel (PDP) */}
+              <div
+                onClick={() => frontInputRef.current?.click()}
+                className="relative h-[320px] bg-zinc-950/80 border-2 border-dashed border-zinc-800 hover:border-[#FF1E1E]/50 rounded-lg flex flex-col items-center justify-center p-4 text-center cursor-pointer transition overflow-hidden group"
+              >
+                <input
+                  type="file"
+                  ref={frontInputRef}
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      setFrontFile(e.target.files[0]);
+                      setFrontPreview(URL.createObjectURL(e.target.files[0]));
+                      setResult(null);
+                    }
+                  }}
+                  accept="image/*"
+                  className="hidden"
+                />
+
+                {frontPreview ? (
+                  <div className="relative w-full h-full">
+                    <img src={frontPreview} alt="Front PDP" className="w-full h-full object-contain" />
+                    {/* Bounding Box Visual Overlays */}
+                    {Object.entries(boxes).map(([key, box]: [string, any]) => {
+                      if (!Array.isArray(box) || box.length !== 4) return null;
+                      const [ymin, xmin, ymax, xmax] = box;
+                      return (
+                        <div
+                          key={key}
+                          className="absolute border border-emerald-500 bg-emerald-500/15 pointer-events-none text-[9px] font-mono text-emerald-300 font-bold px-1"
+                          style={{
+                            top: `${ymin / 10}%`,
+                            left: `${xmin / 10}%`,
+                            width: `${(xmax - xmin) / 10}%`,
+                            height: `${(ymax - ymin) / 10}%`,
+                          }}
+                        >
+                          {key.replace('_', ' ')}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <UploadCloud className="w-8 h-8 text-[#FF1E1E] mx-auto group-hover:scale-110 transition" />
+                    <span className="font-mono text-xs font-bold text-white block uppercase">1. Front Surface (PDP)</span>
+                    <span className="font-mono text-[10px] text-zinc-500">Mandatory: Net Qty, MRP, Brand</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Surface 2: Back Information Panel */}
+              <div
+                onClick={() => backInputRef.current?.click()}
+                className="relative h-[320px] bg-zinc-950/80 border-2 border-dashed border-zinc-800 hover:border-[#FF1E1E]/50 rounded-lg flex flex-col items-center justify-center p-4 text-center cursor-pointer transition overflow-hidden group"
+              >
+                <input
+                  type="file"
+                  ref={backInputRef}
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      setBackFile(e.target.files[0]);
+                      setBackPreview(URL.createObjectURL(e.target.files[0]));
+                      setResult(null);
+                    }
+                  }}
+                  accept="image/*"
+                  className="hidden"
+                />
+
+                {backPreview ? (
+                  <img src={backPreview} alt="Back Panel" className="w-full h-full object-contain" />
+                ) : (
+                  <div className="space-y-2">
+                    <UploadCloud className="w-8 h-8 text-zinc-500 group-hover:text-white mx-auto group-hover:scale-110 transition" />
+                    <span className="font-mono text-xs font-bold text-white block uppercase">2. Back Information Panel (Optional)</span>
+                    <span className="font-mono text-[10px] text-zinc-500">Consumer Care, Barcode, Mfg Details</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Run Button */}
+            <button
+              disabled={!frontFile || loading}
+              onClick={handleAnalyze}
+              className="w-full py-3.5 bg-[#FF1E1E] hover:bg-[#d91616] disabled:opacity-40 text-white font-mono uppercase font-black tracking-wider text-xs rounded-lg transition shadow-lg shadow-[#FF1E1E]/20 flex items-center justify-center gap-2"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              <span>{loading ? 'Performing Multi-Angle Optical Audit...' : `Execute Comprehensive Audit (${category === 'food' ? 'Food' : 'Drugs/Commodities'})`}</span>
+            </button>
+
+            {/* Results Section */}
+            {result && (
+              <div className="p-6 bg-zinc-950 border border-zinc-900 rounded-lg space-y-6 font-mono text-xs">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-900 pb-4">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-base font-black uppercase text-white">
+                        <span className="text-[#FF1E1E]">++</span>Audit: {result.product_name}
+                      </span>
+                      <span
+                        className={`px-2.5 py-0.5 rounded text-[10px] font-bold uppercase border ${
+                          status === 'COMPLIANT'
+                            ? 'bg-emerald-950/60 border-emerald-800 text-emerald-400'
+                            : status === 'WARNING'
+                            ? 'bg-amber-950/60 border-amber-800 text-amber-400'
+                            : 'bg-red-950/60 border-red-800 text-[#FF1E1E]'
+                        }`}
+                      >
+                        {status} ({score}%)
+                      </span>
+                    </div>
+                    <span className="text-zinc-500 text-[11px] block mt-0.5">
+                      Ref: {result.scan_id} • Barcode: {barcode.code} ({barcode.country})
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={() => window.open(`http://localhost:8000/api/v1/scans/${result.scan_id}/export-pdf`, '_blank')}
+                    className="px-4 py-2 bg-[#FF1E1E] hover:bg-[#d91616] text-white rounded font-bold text-xs uppercase flex items-center gap-2 transition"
+                  >
+                    <DownloadCloud className="w-4 h-4" />
+                    <span>Statutory PDF</span>
+                  </button>
+                </div>
+
+                {/* Consumer Care & GS1 Integrity Checks */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <div className="flex items-center gap-2 font-bold text-white mb-2">
+                      <PhoneCall className="w-4 h-4 text-[#FF1E1E]" />
+                      <span>Rule 6(1)(h) Consumer Redressal Audit</span>
+                    </div>
+                    <div className="space-y-1 text-zinc-400 text-[11px]">
+                      <div>Helpline Phone: <span className="text-white font-bold">{care.extracted_phone}</span></div>
+                      <div>Helpline Email: <span className="text-white font-bold">{care.extracted_email}</span></div>
+                      <div>Officer / Cell Designated: <span className="text-white font-bold">{care.has_person_or_designation ? 'YES' : 'NO / MISSING'}</span></div>
+                    </div>
+                  </div>
+
+                  <div className="p-4 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <div className="flex items-center gap-2 font-bold text-white mb-2">
+                      <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                      <span>GS1 Barcode Country Verification</span>
+                    </div>
+                    <div className="space-y-1 text-zinc-400 text-[11px]">
+                      <div>Decoded Code: <span className="text-white font-bold">{barcode.code}</span></div>
+                      <div>GS1 India Registered (890): <span className="text-white font-bold">{barcode.is_gs1_india ? 'YES (Valid Prefix)' : 'NO / International'}</span></div>
+                      <div>Origin Reconciliation: <span className="text-emerald-400 font-bold">{barcode.origin_verified}</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Declarations Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 text-zinc-300">
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">BRAND</span>
+                    <span className="font-bold text-white">{declarations.brand_name || 'MISSING'}</span>
+                  </div>
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">NET QUANTITY</span>
+                    <span className="font-bold text-white">{declarations.net_quantity || 'MISSING'}</span>
+                  </div>
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">MRP (INCL TAX)</span>
+                    <span className="font-bold text-white">{declarations.mrp || 'MISSING'}</span>
+                  </div>
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">UNIT SALE PRICE</span>
+                    <span className="font-bold text-white">{declarations.unit_sale_price || 'MISSING'}</span>
+                  </div>
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">MFG DATE</span>
+                    <span className="font-bold text-white">{declarations.mfg_date || 'MISSING'}</span>
+                  </div>
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">EXPIRY DATE</span>
+                    <span className="font-bold text-white">{declarations.expiry_date || 'MISSING'}</span>
+                  </div>
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">BATCH NO</span>
+                    <span className="font-bold text-white">{declarations.batch_number || 'MISSING'}</span>
+                  </div>
+
+                  {category === 'food' && (
+                    <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                      <span className="text-zinc-500 block text-[10px]">FSSAI LICENSE</span>
+                      <span className="font-bold text-white">{declarations.fssai_license || 'MISSING'}</span>
+                    </div>
+                  )}
+
+                  <div className="p-3 bg-zinc-900/60 border border-zinc-800 rounded">
+                    <span className="text-zinc-500 block text-[10px]">COUNTRY OF ORIGIN</span>
+                    <span className="font-bold text-white">{declarations.country_of_origin || 'India'}</span>
+                  </div>
+                </div>
+              </div>
+            )}
+          </main>
+        </div>
+      </div>
+    </div>
   );
 }

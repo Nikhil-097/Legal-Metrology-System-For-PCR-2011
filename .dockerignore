@@ -1,0 +1,8 @@
+**/node_modules
+**/.next
+**/__pycache__
+**/.venv
+**/venv
+*.git
+minio_data/
+postgres_data/

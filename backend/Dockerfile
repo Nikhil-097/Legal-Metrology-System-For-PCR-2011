@@ -1,4 +1,4 @@
-# Stage 1: Base image with Python runtime
+﻿# Stage 1: Base image with Python runtime
 FROM python:3.10-slim
 
 # Python configuration
@@ -25,8 +25,6 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Pre-download EasyOCR model during build
-RUN python3 -c "import easyocr; easyocr.Reader(['en'], gpu=False, download_enabled=True)"
 
 # Copy application source and data
 COPY . .

@@ -1,0 +1,12 @@
+[
+  {
+    "brand_name": "Sample Brand",
+    "corrected_fields": {
+      "net_quantity": "500 g",
+      "mrp": "Rs 120.00"
+    },
+    "previous_mistake": {
+      "net_quantity": "MISSING"
+    }
+  }
+]
