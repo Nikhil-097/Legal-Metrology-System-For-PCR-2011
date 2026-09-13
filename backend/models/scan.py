@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from sqlalchemy import Column, Integer, String, Float, Boolean, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
-from app.db.base import Base
+from db.base import Base
 
 
 class ScanRecord(Base):
@@ -20,7 +20,7 @@ class ScanRecord(Base):
     height_cm = Column(Float, nullable=False, default=10.0)
     width_cm = Column(Float, nullable=False, default=10.0)
     pdp_area_cm2 = Column(Float, nullable=False)
-    ppm_scale = Column(Float, nullable=False)  # Pixels per millimeter
+    ppm_scale = Column(Float, nullable=True)  # Pixels per millimeter; populated when physical scale is available
     required_min_font_height_mm = Column(Float, nullable=False, default=1.0)
 
     # Compliance Results
