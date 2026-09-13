@@ -1,7 +1,7 @@
 from datetime import date
 from sqlalchemy import Column, Integer, String, Float, Boolean, Date, ForeignKey, JSON, ARRAY
 from sqlalchemy.orm import relationship
-from app.db.base import Base
+from db.base import Base
 
 
 class LegalRule(Base):

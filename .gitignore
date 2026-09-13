@@ -19,3 +19,8 @@ build/
 # System files
 .DS_Store
 Thumbs.db
+
+# Generated/test files
+*.pdf
+backend/temp_uploads/
+postgres_schema_backup.sql
