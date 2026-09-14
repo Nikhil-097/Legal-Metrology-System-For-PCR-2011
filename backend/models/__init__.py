@@ -1,7 +1,13 @@
-from app.models.user import User, UserRole
-from app.models.scan import ScanRecord, DetectedViolation
-from app.models.rule import LegalRule, RuleVersion, RuleRequirement, FontSizeRule, LegalExemption
-from app.models.report import InspectionReport, ShowCauseNotice
+from models.user import User, UserRole
+from models.scan import ScanRecord, DetectedViolation
+from models.rules import (
+    LegalRule,
+    RuleVersion,
+    RuleRequirement,
+    FontSizeRule,
+    LegalExemption,
+)
+from models.reports import InspectionReport, ShowCauseNotice
 
 __all__ = [
     "User",
@@ -14,5 +20,5 @@ __all__ = [
     "FontSizeRule",
     "LegalExemption",
     "InspectionReport",
-    "ShowCauseNotice"
+    "ShowCauseNotice",
 ]
